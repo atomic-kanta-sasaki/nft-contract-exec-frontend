@@ -21,6 +21,10 @@ const DisplayFlex = style.div`
   display: flex;
 `;
 
+const MarginTop = style.div`
+  margin-top:60%
+`
+
 export default function StandardImageList() {
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -42,7 +46,9 @@ export default function StandardImageList() {
                     <div>
                       所有者: hogehogehoge <br />
                       値段: 1ETH <br />
-                      <Button variant="contained">Contained</Button>
+                      <MarginTop>
+                        <Button variant="contained">Contained</Button>
+                      </MarginTop>
                     </div>
                   </DisplayFlex>
                 </ImageListItem>
