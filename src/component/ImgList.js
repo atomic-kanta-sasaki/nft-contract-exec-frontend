@@ -44,40 +44,40 @@ const handleClick = async(e) => {
   console.log(kk)
 }
 const StandardImageList = (props) => {
-  console.log(props)
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-        {itemData.map((item) => (
-          <Grid item xs={2} sm={4} md={4}>
-            <Item>
-              <ImageList sx={{ width: 400, height: 200 }} cols={1} rowHeight={164}>
-                <ImageListItem key={item.img}>
-                  <DisplayFlex>
-                    <div>
-                      <img
-                        src={`${props.imageUri}?w=164&h=164&fit=crop&auto=format`}
-                        srcSet={`${props.imageUri}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                        alt={item.title}
-                        loading="lazy"
-                      />
-                    </div>
-                    <div>
-                      所有者: {props.owner} <br />
-                      値段: 1ETH <br />
-                      <MarginTop>
-                        <Button variant="contained" onClick={() => handleClick({from:'0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', to:'0x70997970C51812dc3A010C7d01b50e0d17dc79C8', tokenId:3})}>Contained</Button>
-                      </MarginTop>
-                    </div>
-                  </DisplayFlex>
-                </ImageListItem>
-              </ImageList>
-            </Item>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
-  );
+  console.log("props")
+  console.log(props.length)
+  console.log("props")
+    return (
+      <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+          {props[0]?.map((item) => (
+            <Grid item xs={2} sm={4} md={4}>
+              <Item>
+                <ImageList sx={{ width: 400, height: 400 }} cols={1} rowHeight={164} key={item.id}>
+                  <ImageListItem key={item.id}>
+                      <div>
+                        <img
+                          src={`${item.imageUri}?w=164&h=164&fit=crop&auto=format`}
+                          srcSet={`${item.imageUri}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                          alt={item.title}
+                          style={{height: '200px', width: '200px'}}
+                          loading="lazy"
+                        />
+                      </div>
+                      <div>
+                        所有者:<br /> {item.owner} <br />
+
+                        値段: 1ETH <br />
+                          <Button variant="contained" onClick={() => handleClick({from:item.owner, to:'0x70997970C51812dc3A010C7d01b50e0d17dc79C8', tokenId:item.tokenId})}>Contained</Button>
+                      </div>
+                  </ImageListItem>
+                </ImageList>
+              </Item>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
 }
 
 const itemData = [

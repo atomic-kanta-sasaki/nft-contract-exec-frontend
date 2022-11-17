@@ -37,7 +37,7 @@ export default function SimpleContainer() {
                 .catch(e => {
                   console.log(e)
                 })
-              info.push({owner:owner, tokenId:tokenId, imageUri: metaData.image})
+              info.push({id:tokenId, owner:owner, tokenId:tokenId, imageUri: metaData.image})
             })
             console.log(info)
             setNftSalePageInfo((prevState) => ([ ...prevState, info ]));
@@ -45,7 +45,9 @@ export default function SimpleContainer() {
         };
         fetchData().catch((e) => console.log(e));
     }, []);
-
+    console.log("nftSalePageInfo[0]")
+    console.log(nftSalePageInfo[0])
+    console.log("nftSalePageInfo[0]")
   return (
     <React.Fragment>
       <CssBaseline />
