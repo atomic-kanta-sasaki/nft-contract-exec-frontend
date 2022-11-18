@@ -5,10 +5,9 @@ import { experimentalStyled as styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import style from 'styled-components';
 import Button from '@mui/material/Button';
 import artifact from "../abi/nft.json";
-import { ethers, Contract } from "ethers";
+import { ethers } from "ethers";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -18,74 +17,57 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-const DisplayFlex = style.div`
-  display: flex;
-`;
-
-const MarginTop = style.div`
-  margin-top:60%
-`
  // metamaskを介してネットワークノードとの通信をするオブジェクトを作成する
- const contractAddress = "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0";
+ const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
  // アドレス、ABI, プロバイダを指定してコントラクトオブジェクトを作成
  // コントラクトの状態を変化させる(gas代が必要な）操作をするためには場合はSignerを与える必要がある
  const provider = new ethers.providers.JsonRpcProvider();
  const contract = new ethers.Contract(contractAddress, artifact.abi, provider);
- const signer = provider.getSigner();
- const nftContract = contract.connect(signer);
-
- const signer0 = provider.getSigner("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
- const nftContract0 = contract.connect(signer0);
-// イベントハンドラ
-// safeTranferを実行する
-// 購入者がデポジットする
-// transfer購入者 -> 出品者
-// withdraw出品者
 const handleClick = async(e) => {
-  const kk = await nftContract.approve(e.to, e.tokenId)
-  await nftContract['safeTransferFrom(address,address,uint256)'](e.from, e.to, e.tokenId)
+  const to = await getAccount()
+  console.log(to)
+  const signer = provider.getSigner(e.from);
+  const nftContract = contract.connect(signer);
+  await nftContract.approve(to, e.tokenId)
+  // 同じ名前の関数が存在するときはこんな感じで指定するらしい
+  await nftContract['safeTransferFrom(address,address,uint256)'](e.from, to, e.tokenId)
 
   // ether送金
-  let receiverAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  let receiverAddress = e.from
   // 送付する Ether の量
   let amountInEther = '10'
-
   // トランザクションオブジェクトを作成
   let tx = {
       to: receiverAddress,
       // 単位 ether を、単位 wei に変換
       value: ethers.utils.parseEther(amountInEther)
   }
-  const signer02 = provider.getSigner("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
+  // 送金Transactionの実行
+  const signer02 = provider.getSigner(to);
   signer02.sendTransaction(tx)
     .then((txObj) => {
         console.log(txObj)
     })
 }
-
-const handleClick0 = async(e) => {
-  const kk = await nftContract0.approve(e.to, e.tokenId)
-  await nftContract['safeTransferFrom(address,address,uint256)'](e.from, e.to, e.tokenId)
-
-  // ether送金
-  let receiverAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
-  // 送付する Ether の量
-  let amountInEther = '10'
-
-  // トランザクションオブジェクトを作成
-  let tx = {
-      to: receiverAddress,
-      // 単位 ether を、単位 wei に変換
-      value: ethers.utils.parseEther(amountInEther)
+const getAccount = async () => {
+  try {
+      const account = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (account.length > 0) {
+          return account[0];
+      } else {
+          return "";
+      }
+  } catch (err) {
+      if (err.code === 4001) {
+          // EIP-1193 userRejectedRequest error
+          // If this happens, the user rejected the connection request.
+          console.log('Please connect to MetaMask.');
+      } else {
+          console.error(err);
+      }
+      return "";
   }
-  const signer03 = provider.getSigner("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
-  signer03.sendTransaction(tx)
-  .then((txObj) => {
-      console.log(txObj)
-  })
 }
-
-
 const StandardImageList = (props) => {
   console.log("props")
   console.log(props.length)
@@ -109,9 +91,8 @@ const StandardImageList = (props) => {
                       </div>
                       <div>
                         所有者:<br /> {item.owner} <br />
-                        値段: 1ETH <br />
-                          <Button variant="contained" onClick={() => handleClick({from:"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", to:'0x70997970C51812dc3A010C7d01b50e0d17dc79C8', tokenId:item.tokenId})}>購入</Button>
-                          <Button variant="contained" onClick={() => handleClick0({from:'0x70997970C51812dc3A010C7d01b50e0d17dc79C8', to:"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", tokenId:item.tokenId})}>再購入</Button>
+                        値段: 10ETH <br />
+                          <Button variant="contained" onClick={() => handleClick({from:item.owner, tokenId:item.tokenId})}>購入</Button>
                       </div>
                   </ImageListItem>
                 </ImageList>
