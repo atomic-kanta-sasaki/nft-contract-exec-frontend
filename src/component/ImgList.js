@@ -8,6 +8,7 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import artifact from "../abi/nft.json";
 import { ethers } from "ethers";
+import AppBar from './AppBar';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -57,6 +58,7 @@ const getAccount = async () => {
       } else {
           return "";
       }
+
   } catch (err) {
       if (err.code === 4001) {
           // EIP-1193 userRejectedRequest error
@@ -69,18 +71,18 @@ const getAccount = async () => {
   }
 }
 const StandardImageList = (props) => {
-  console.log("props")
-  console.log(props.length)
-  console.log("props")
+
     return (
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+          <AppBar title={props.title} />
           {props[0]?.map((item) => (
             <Grid item xs={2} sm={4} md={4}>
               <Item>
                 <ImageList sx={{ width: 400, height: 400 }} cols={1} rowHeight={164} key={item.id}>
                   <ImageListItem key={item.id}>
                       <div>
+
                         <img
                           src={`${item.imageUri}?w=164&h=164&fit=crop&auto=format`}
                           srcSet={`${item.imageUri}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
@@ -92,12 +94,11 @@ const StandardImageList = (props) => {
                       <div>
                         所有者:<br /> {item.owner} <br />
                         値段: 10ETH <br />
-                          <Button variant="contained" onClick={() => handleClick({from:item.owner, tokenId:item.tokenId})}>購入</Button>
+                      <Button variant="contained" onClick={() => handleClick({from:item.owner, tokenId:item.tokenId})}>購入</Button>
                       </div>
                   </ImageListItem>
                 </ImageList>
               </Item>
-
             </Grid>
           ))}
 

@@ -6,6 +6,12 @@ import { ethers, Contract } from "ethers";
 import { useEffect, useState } from "react";
 import artifact from "../abi/nft.json";
 import axios from 'axios'
+import style from "styled-components";
+
+const MarginTop = style.div`
+  margin-top 5%
+`;
+
 export default function SimpleContainer() {
   // NFT所有者情報
   // NFTのtokenId -> meta data -> image url
@@ -19,7 +25,8 @@ export default function SimpleContainer() {
   const contract = new ethers.Contract(contractAddress, artifact.abi, provider);
   const signer = provider.getSigner();
   const nftContract = contract.connect(signer);
-  const tokenIdList = [1,2,3,4]
+  const tokenIdList = [1,2,3,4,5,6,7]
+
   const info = []
   useEffect(() => {
       const fetchData = async() => {
@@ -47,12 +54,16 @@ export default function SimpleContainer() {
   console.log("nftSalePageInfo[0]")
   console.log(nftSalePageInfo[0])
   console.log("nftSalePageInfo[0]")
+
+
   return (
     <React.Fragment>
       <CssBaseline />
       <Container fixed>
+        <MarginTop />
         <ImgList
           { ...nftSalePageInfo }
+          title="販売NFT一覧"
         />
       </Container>
     </React.Fragment>
