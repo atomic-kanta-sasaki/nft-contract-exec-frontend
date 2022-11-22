@@ -70,19 +70,21 @@ const getAccount = async () => {
       return "";
   }
 }
-const StandardImageList = (props) => {
 
+const StandardImageList = (props) => {
+    console.log('props')
+    console.log(props)
+    const { data, title } = props
     return (
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-          <AppBar title={props.title} />
-          {props[0]?.map((item) => (
-            <Grid item xs={2} sm={4} md={4}>
+          <AppBar title={title} />
+          {data?.map((item) => (
+            <Grid item xs={2} sm={4} md={4} key={item.id}>
               <Item>
                 <ImageList sx={{ width: 400, height: 400 }} cols={1} rowHeight={164} key={item.id}>
                   <ImageListItem key={item.id}>
                       <div>
-
                         <img
                           src={`${item.imageUri}?w=164&h=164&fit=crop&auto=format`}
                           srcSet={`${item.imageUri}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
