@@ -19,7 +19,7 @@ export default function SimpleContainer() {
 
   // metamaskを介してネットワークノードとの通信をするオブジェクトを作成する
 
-  const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+  const contractAddress = "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d";
   // アドレス、ABI, プロバイダを指定してコントラクトオブジェクトを作成
   // コントラクトの状態を変化させる(gas代が必要な）操作をするためには場合はSignerを与える必要がある
   const provider = new ethers.providers.JsonRpcProvider();
@@ -101,32 +101,37 @@ export default function SimpleContainer() {
     // safeMintはonlyOwnerなのでこのアドレスしかMintすることができない
     // onlyOwnerではなくても行けるのかは別途調査が必要
     nftContract.safeMint("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", res1.data.IpfsHash)
-
+    if (res1.data.isDuplicate != true) {
+      nftContract.incrementNftNum()
+    };
   }
 
   // NFT所有者情報
   // NFTのtokenId -> meta data -> image url
-  const tokenIdList = [1,2,3,4,5, 6 ,7]
+  const tokenIdList = []
   const [nftSalePageInfo, setNftSalePageInfo]  = useState();
   useEffect(() => {
     console.log('useeffect run')
     const fetchData = async() => {
       // owner of の呼出し
       // 配列にする
+      const nftNum = await nftContract.getNftNum()
+      for (let step = 0; step < nftNum; step++) {
+        tokenIdList.push(step)
+      }
       const info = await Promise.all(
-        tokenIdList.map(async(id) => {
-          const owner = await nftContract.ownerOf(id)
-          const tokenId = id
-          const metaDataUri = await nftContract.tokenURI(id)
-          const metaData =  (await axios.get(metaDataUri)).data
-          const address = await getAccount()
-          const result = { id:tokenId, owner:owner, tokenId:tokenId, imageUri: metaData.image }
-          if(owner.toUpperCase() === address.toUpperCase()) {
-            return result
-          }
-        })
+          tokenIdList.map(async(id) => {
+            const owner = await nftContract.ownerOf(id)
+            const tokenId = id
+            const metaDataUri = await nftContract.tokenURI(id)
+            const metaData =  (await axios.get(metaDataUri)).data
+            const address = await getAccount()
+            const result = { id:tokenId, owner:owner, tokenId:tokenId, imageUri: metaData.image }
+            if(owner.toUpperCase() === address.toUpperCase()) {
+              return result
+            }
+          })
       )
-      // console.log(info)
       return info.filter(v => v)
       // setNftSalePageInfo((prevState) => ([ ...prevState, info ]));
     };

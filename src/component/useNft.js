@@ -10,7 +10,7 @@ export const useNft = () => {
         owner: ''
       });
     // metamaskを介してネットワークノードとの通信をするオブジェクトを作成する
-    const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+    const contractAddress = "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d";
     // アドレス、ABI, プロバイダを指定してコントラクトオブジェクトを作成
     // コントラクトの状態を変化させる(gas代が必要な）操作をするためには場合はSignerを与える必要がある
     const provider = new ethers.providers.JsonRpcProvider();
