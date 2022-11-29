@@ -15,21 +15,13 @@ const MarginTop = style.div`
 export default function SimpleContainer() {
   // NFT所有者情報
   // NFTのtokenId -> meta data -> image url
-  // metamaskを介してネットワークノードとの通信をするオブジェクトを作成する
-  const contractAddress = "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d";
-  // アドレス、ABI, プロバイダを指定してコントラクトオブジェクトを作成
-  // コントラクトの状態を変化させる(gas代が必要な）操作をするためには場合はSignerを与える必要がある
-  const provider = new ethers.providers.JsonRpcProvider();
-  // const provider = new ethers.providers.AlchemyProvider(
-  //   "goerli",
-  //   process.env.ALCHEMY_API_KEY
-  // );
-  // const userWallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-  const contract = new ethers.Contract(contractAddress, artifact.abi, provider);
-  // const contract = new ethers.Contract(contractAddress, artifact.abi, userWallet);
-
-  const signer = provider.getSigner();
-  const nftContract = contract.connect(signer);
+  const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+  const provider = new ethers.providers.AlchemyProvider(
+    "goerli",
+    process.env.REACT_APP_ALCHEMY_API_KEY
+  );
+  const userWallet = new ethers.Wallet(process.env.REACT_APP_PRIVATE_KEY, provider);
+  const contract = new ethers.Contract(contractAddress, artifact.abi, userWallet);
 
   const info = []
   // NFT所有者情報
@@ -39,7 +31,7 @@ export default function SimpleContainer() {
   useEffect(() => {
     console.log('useeffect run')
     const fetchData = async() => {
-      const nftNum = await nftContract.getNftNum()
+      const nftNum = await contract.getNftNum()
       for (let step = 0; step < nftNum; step++) {
         tokenIdList.push(step)
       }
@@ -48,9 +40,9 @@ export default function SimpleContainer() {
       // 配列にする
       const info = await Promise.all(
         tokenIdList.map(async(id) => {
-          const owner = await nftContract.ownerOf(id)
+          const owner = await contract.ownerOf(id)
           const tokenId = id
-          const metaDataUri = await nftContract.tokenURI(id)
+          const metaDataUri = await contract.tokenURI(id)
           const metaData =  (await axios.get(metaDataUri)).data
           const result = { id:tokenId, owner:owner, tokenId:tokenId, imageUri: metaData.image }
           return result

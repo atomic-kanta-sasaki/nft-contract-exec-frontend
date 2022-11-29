@@ -16,19 +16,17 @@ const MarginTop = style.div`
 `;
 export default function SimpleContainer() {
   const jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJiOTkwMTFiNC1lNzIyLTQ1NGMtOWEwNC0yOWE3OWU2ZjZjMzIiLCJlbWFpbCI6ImthLXNhc2FraUBzaW9zLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImlkIjoiRlJBMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfSx7ImlkIjoiTllDMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiIxYzA3ZGE4ZDA5OGJmY2VlNWFmMyIsInNjb3BlZEtleVNlY3JldCI6ImU0MmZiYTE3OWQxNWZiZGFiMTQ3ZmUxOWJmMGVkMGI5N2QzN2FmNWJlNjE1NWVjZGYzM2Q2MjRkNjgyN2IwM2YiLCJpYXQiOjE2NjkwMjQwMjN9.8eC7ByPhkihGcR29rZeplrpaVDaZ_Nlpuae9nVAmkFY"
-
-  // metamaskを介してネットワークノードとの通信をするオブジェクトを作成する
-
-  const contractAddress = "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d";
-  // アドレス、ABI, プロバイダを指定してコントラクトオブジェクトを作成
-  // コントラクトの状態を変化させる(gas代が必要な）操作をするためには場合はSignerを与える必要がある
-  const provider = new ethers.providers.JsonRpcProvider();
-  const contract = new ethers.Contract(contractAddress, artifact.abi, provider);
-  const signer = provider.getSigner();
-  const nftContract = contract.connect(signer);
+  const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+  const provider = new ethers.providers.AlchemyProvider(
+    "goerli",
+    process.env.REACT_APP_ALCHEMY_API_KEY
+  );
+  const userWallet = new ethers.Wallet(process.env.REACT_APP_PRIVATE_KEY, provider);
+  const nftContract = new ethers.Contract(contractAddress, artifact.abi, userWallet);
   const getAccount = async () => {
     try {
         const account = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        console.log(account)
         if (account.length > 0) {
             return account[0];
         } else {
@@ -100,10 +98,16 @@ export default function SimpleContainer() {
 
     // safeMintはonlyOwnerなのでこのアドレスしかMintすることができない
     // onlyOwnerではなくても行けるのかは別途調査が必要
-    nftContract.safeMint("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", res1.data.IpfsHash)
     if (res1.data.isDuplicate != true) {
       nftContract.incrementNftNum()
     };
+    const sleep = (second) => new Promise(resolve => setTimeout(resolve, second * 5000))
+    console.log('start')
+    console.log(`${new Date().getSeconds()} 秒`)
+    await sleep(1)
+    console.log(`${new Date().getSeconds()} 秒`)
+    console.log('end')
+    nftContract.safeMint("0x145242286AE8184cA885E6B134E1A1bA73858BE8", res1.data.IpfsHash)
   }
 
   // NFT所有者情報
@@ -119,6 +123,9 @@ export default function SimpleContainer() {
       for (let step = 0; step < nftNum; step++) {
         tokenIdList.push(step)
       }
+      console.log('nftNum')
+      console.log(tokenIdList)
+      console.log('nftNum')
       const info = await Promise.all(
           tokenIdList.map(async(id) => {
             const owner = await nftContract.ownerOf(id)
@@ -126,6 +133,9 @@ export default function SimpleContainer() {
             const metaDataUri = await nftContract.tokenURI(id)
             const metaData =  (await axios.get(metaDataUri)).data
             const address = await getAccount()
+            console.log('address')
+            console.log(address)
+            console.log('address')
             const result = { id:tokenId, owner:owner, tokenId:tokenId, imageUri: metaData.image }
             if(owner.toUpperCase() === address.toUpperCase()) {
               return result
@@ -137,8 +147,6 @@ export default function SimpleContainer() {
     };
     fetchData().then(
         (info) => {
-          console.log("info")
-          console.log(info)
           setNftSalePageInfo(info)
     }).catch((e) => console.log(e));
   }, []);

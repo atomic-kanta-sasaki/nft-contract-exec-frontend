@@ -19,33 +19,46 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
  // metamaskを介してネットワークノードとの通信をするオブジェクトを作成する
- const contractAddress = "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d";
- // アドレス、ABI, プロバイダを指定してコントラクトオブジェクトを作成
- // コントラクトの状態を変化させる(gas代が必要な）操作をするためには場合はSignerを与える必要がある
- const provider = new ethers.providers.JsonRpcProvider();
- const contract = new ethers.Contract(contractAddress, artifact.abi, provider);
+ const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+ const provider = new ethers.providers.AlchemyProvider(
+   "goerli",
+   process.env.REACT_APP_ALCHEMY_API_KEY
+ );
+  const userWallet = new ethers.Wallet(process.env.REACT_APP_PRIVATE_KEY, provider);
+  const nftContract = new ethers.Contract(contractAddress, artifact.abi, userWallet);
+
 const handleClick = async(e) => {
   const to = await getAccount()
+  console.log(e.from)
   console.log(to)
-  const signer = provider.getSigner(e.from);
-  const nftContract = contract.connect(signer);
-  await nftContract.approve(to, e.tokenId)
+  console.log(e.tokenId)
+  const hhhh = await nftContract.approve(to, e.tokenId)
+  const sleep = (second) => new Promise(resolve => setTimeout(resolve, second * 15000))
+  console.log('start')
+  console.log(`${new Date().getSeconds()} 秒`)
+  await sleep(1)
+  console.log(`${new Date().getSeconds()} 秒`)
+  console.log('end')
   // 同じ名前の関数が存在するときはこんな感じで指定するらしい
   await nftContract['safeTransferFrom(address,address,uint256)'](e.from, to, e.tokenId)
-
+  console.log('start')
+  console.log(`${new Date().getSeconds()} 秒`)
+  await sleep(1)
+  console.log(`${new Date().getSeconds()} 秒`)
+  console.log('end')
   // ether送金
   let receiverAddress = e.from
   // 送付する Ether の量
-  let amountInEther = '10'
+  let amountInEther = '0.001'
   // トランザクションオブジェクトを作成
   let tx = {
+      from: to,
       to: receiverAddress,
       // 単位 ether を、単位 wei に変換
       value: ethers.utils.parseEther(amountInEther)
   }
   // 送金Transactionの実行
-  const signer02 = provider.getSigner(to);
-  signer02.sendTransaction(tx)
+  provider.sendTransaction(tx)
     .then((txObj) => {
         console.log(txObj)
     })
@@ -95,7 +108,7 @@ const StandardImageList = (props) => {
                       </div>
                       <div>
                         所有者:<br /> {item.owner} <br />
-                        値段: 10ETH <br />
+                        値段: 0.001GoeriETH <br />
                       <Button variant="contained" onClick={() => handleClick({from:item.owner, tokenId:item.tokenId})}>購入</Button>
                       </div>
                   </ImageListItem>
