@@ -9,6 +9,7 @@ import axios, { AxiosError } from 'axios'
 import style from "styled-components";
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Loading from './Loading';
 
 const FormData = require("form-data");
 const MarginTop = style.div`
@@ -45,7 +46,15 @@ export default function SimpleContainer() {
   }
 
   const [file, setFile] = useState(null)
+  const [ isLoading, setIsLoading ] = useState(false);
+  const [open, setOpen] = React.useState(false);
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
 
+    setOpen(false);
+  };
   const onChangeFile = (e) => {
     const files = e.target.files
     if (files && files[0]) {
@@ -57,6 +66,7 @@ export default function SimpleContainer() {
     if (!file) {
       return
     }
+    setIsLoading(true);
     const formData = new FormData()
     formData.append("file", file)
 
@@ -108,6 +118,8 @@ export default function SimpleContainer() {
     console.log(`${new Date().getSeconds()} 秒`)
     console.log('end')
     nftContract.safeMint("0x145242286AE8184cA885E6B134E1A1bA73858BE8", res1.data.IpfsHash)
+    setIsLoading(false);
+    setOpen(true);
   }
 
   // NFT所有者情報
@@ -156,10 +168,14 @@ export default function SimpleContainer() {
       <CssBaseline />
       <Container fixed>
         <MarginTop />
-        <ImgList
-          data={nftSalePageInfo}
-          title="所持しているNFT"
-        />
+        { isLoading ?
+              <Loading /> :
+              <ImgList
+              data={nftSalePageInfo}
+              title="所持しているNFT"
+            />
+        }
+
 
         <MarginTop />
         <Typography
