@@ -63,63 +63,66 @@ export default function SimpleContainer() {
   }
 
   const onClickSubmit = async () => {
-    if (!file) {
-      return
+    try {
+      if (!file) {
+        return
+      }
+      setIsLoading(true);
+      const formData = new FormData()
+      formData.append("file", file)
+
+      var config0 = {
+        method: 'post',
+        url: 'https://api.pinata.cloud/pinning/pinFileToIPFS',
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`,
+        },
+        data : formData
+      };
+
+      const res0 = await axios(config0)
+      console.log(res0.data.IpfsHash);
+
+      var json = JSON.stringify({
+        "name": "NFT",
+        "description": "NFT",
+        "image": `https://ipfs.io/ipfs/${res0.data.IpfsHash}`,
+        "attributes": [
+            {
+                "value":10
+            }
+        ]
+      });
+      var config1 = {
+        method: 'post',
+        url: 'https://api.pinata.cloud/pinning/pinJSONToIPFS',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwtToken}`,
+        },
+        data : json
+      };
+      const res1 = await axios(config1);
+      console.log(res1.data);
+
+      // safeMintはonlyOwnerなのでこのアドレスしかMintすることができない
+      // onlyOwnerではなくても行けるのかは別途調査が必要
+      if (res1.data.isDuplicate != true) {
+        nftContract.incrementNftNum()
+      };
+      const sleep = (second) => new Promise(resolve => setTimeout(resolve, second * 5000))
+      console.log('start')
+      console.log(`${new Date().getSeconds()} 秒`)
+      await sleep(1)
+      console.log(`${new Date().getSeconds()} 秒`)
+      console.log('end')
+      nftContract.safeMint("0x145242286AE8184cA885E6B134E1A1bA73858BE8", res1.data.IpfsHash)
+      setIsLoading(false);
+      setOpen(true);
+    } catch(e) {
+      setIsLoading(false);
+      setOpen(true);
     }
-    setIsLoading(true);
-    const formData = new FormData()
-    formData.append("file", file)
-
-    var config0 = {
-      method: 'post',
-      url: 'https://api.pinata.cloud/pinning/pinFileToIPFS',
-      headers: {
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      data : formData
-    };
-
-    const res0 = await axios(config0)
-    console.log(res0.data.IpfsHash);
-
-    var json = JSON.stringify({
-      "name": "NFT",
-      "description": "NFT",
-      "image": `https://ipfs.io/ipfs/${res0.data.IpfsHash}`,
-      "attributes": [
-          {
-              "value":10
-          }
-      ]
-    });
-    var config1 = {
-      method: 'post',
-      url: 'https://api.pinata.cloud/pinning/pinJSONToIPFS',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      data : json
-    };
-
-
-    const res1 = await axios(config1);
-    console.log(res1.data);
-
-    // safeMintはonlyOwnerなのでこのアドレスしかMintすることができない
-    // onlyOwnerではなくても行けるのかは別途調査が必要
-    if (res1.data.isDuplicate != true) {
-      nftContract.incrementNftNum()
-    };
-    const sleep = (second) => new Promise(resolve => setTimeout(resolve, second * 5000))
-    console.log('start')
-    console.log(`${new Date().getSeconds()} 秒`)
-    await sleep(1)
-    console.log(`${new Date().getSeconds()} 秒`)
-    console.log('end')
-    nftContract.safeMint("0x145242286AE8184cA885E6B134E1A1bA73858BE8", res1.data.IpfsHash)
-    setIsLoading(false);
-    setOpen(true);
   }
 
   // NFT所有者情報

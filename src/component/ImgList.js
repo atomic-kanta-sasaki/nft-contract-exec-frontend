@@ -56,42 +56,46 @@ const StandardImageList = (props) => {
     console.log(props)
     const { data, title } = props
     const handleClick = async(e) => {
-      setIsLoading(true)
-      const to = await getAccount()
-      console.log(e.from)
-      console.log(to)
-      console.log(e.tokenId)
-      const hhhh = await nftContract.approve(to, e.tokenId)
-      const sleep = (second) => new Promise(resolve => setTimeout(resolve, second * 15000))
-      console.log('start')
-      console.log(`${new Date().getSeconds()} 秒`)
-      await sleep(1)
-      console.log(`${new Date().getSeconds()} 秒`)
-      console.log('end')
-      // 同じ名前の関数が存在するときはこんな感じで指定するらしい
-      await nftContract['safeTransferFrom(address,address,uint256)'](e.from, to, e.tokenId)
-      console.log('start')
-      console.log(`${new Date().getSeconds()} 秒`)
-      await sleep(1)
-      console.log(`${new Date().getSeconds()} 秒`)
-      console.log('end')
-      // ether送金
-      let receiverAddress = e.from
-      // 送付する Ether の量
-      let amountInEther = '0.001'
-      // トランザクションオブジェクトを作成
-      let tx = {
-          from: to,
-          to: receiverAddress,
-          // 単位 ether を、単位 wei に変換
-          value: ethers.utils.parseEther(amountInEther)
+      try {
+        setIsLoading(true)
+        const to = await getAccount()
+        console.log(e.from)
+        console.log(to)
+        console.log(e.tokenId)
+        const hhhh = await nftContract.approve(to, e.tokenId)
+        const sleep = (second) => new Promise(resolve => setTimeout(resolve, second * 15000))
+        console.log('start')
+        console.log(`${new Date().getSeconds()} 秒`)
+        await sleep(1)
+        console.log(`${new Date().getSeconds()} 秒`)
+        console.log('end')
+        // 同じ名前の関数が存在するときはこんな感じで指定するらしい
+        await nftContract['safeTransferFrom(address,address,uint256)'](e.from, to, e.tokenId)
+        console.log('start')
+        console.log(`${new Date().getSeconds()} 秒`)
+        await sleep(1)
+        console.log(`${new Date().getSeconds()} 秒`)
+        console.log('end')
+        // ether送金
+        let receiverAddress = e.from
+        // 送付する Ether の量
+        let amountInEther = '0.001'
+        // トランザクションオブジェクトを作成
+        let tx = {
+            from: to,
+            to: receiverAddress,
+            // 単位 ether を、単位 wei に変換
+            value: ethers.utils.parseEther(amountInEther)
+        }
+        setIsLoading(false)
+        // 送金Transactionの実行
+        provider.sendTransaction(tx)
+          .then((txObj) => {
+              console.log(txObj)
+          })
+      } catch(e) {
+        setIsLoading(false)
       }
-      setIsLoading(false)
-      // 送金Transactionの実行
-      provider.sendTransaction(tx)
-        .then((txObj) => {
-            console.log(txObj)
-        })
     }
     return (
       <Box sx={{ flexGrow: 1 }}>
