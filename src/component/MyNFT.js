@@ -2,7 +2,7 @@ import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import ImgList from './ImgList'
-import { ethers, Contract } from "ethers";
+import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import artifact from "../abi/nft.json";
 import axios, { AxiosError } from 'axios'
@@ -14,28 +14,19 @@ const FormData = require("form-data");
 const MarginTop = style.div`
   margin-top 5%
 `;
-
-
 export default function SimpleContainer() {
   const jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJiOTkwMTFiNC1lNzIyLTQ1NGMtOWEwNC0yOWE3OWU2ZjZjMzIiLCJlbWFpbCI6ImthLXNhc2FraUBzaW9zLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImlkIjoiRlJBMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfSx7ImlkIjoiTllDMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiIxYzA3ZGE4ZDA5OGJmY2VlNWFmMyIsInNjb3BlZEtleVNlY3JldCI6ImU0MmZiYTE3OWQxNWZiZGFiMTQ3ZmUxOWJmMGVkMGI5N2QzN2FmNWJlNjE1NWVjZGYzM2Q2MjRkNjgyN2IwM2YiLCJpYXQiOjE2NjkwMjQwMjN9.8eC7ByPhkihGcR29rZeplrpaVDaZ_Nlpuae9nVAmkFY"
-
-  // NFT所有者情報
-  // NFTのtokenId -> meta data -> image url
-  const [nftSalePageInfo, setNftSalePageInfo]  = useState([]);
-  // metamaskを介してネットワークノードとの通信をするオブジェクトを作成する
-
-  const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
-  // アドレス、ABI, プロバイダを指定してコントラクトオブジェクトを作成
-  // コントラクトの状態を変化させる(gas代が必要な）操作をするためには場合はSignerを与える必要がある
-  const provider = new ethers.providers.JsonRpcProvider();
-  const contract = new ethers.Contract(contractAddress, artifact.abi, provider);
-  const signer = provider.getSigner();
-  const nftContract = contract.connect(signer);
-  const tokenIdList = [1,2,3,4,5, 6 ,7]
-  const info = []
+  const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+  const provider = new ethers.providers.AlchemyProvider(
+    "goerli",
+    process.env.REACT_APP_ALCHEMY_API_KEY
+  );
+  const userWallet = new ethers.Wallet(process.env.REACT_APP_PRIVATE_KEY, provider);
+  const nftContract = new ethers.Contract(contractAddress, artifact.abi, userWallet);
   const getAccount = async () => {
     try {
         const account = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        console.log(account)
         if (account.length > 0) {
             return account[0];
         } else {
@@ -107,52 +98,69 @@ export default function SimpleContainer() {
 
     // safeMintはonlyOwnerなのでこのアドレスしかMintすることができない
     // onlyOwnerではなくても行けるのかは別途調査が必要
-    nftContract.safeMint("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", res1.data.IpfsHash)
-
+    if (res1.data.isDuplicate != true) {
+      nftContract.incrementNftNum()
+    };
+    const sleep = (second) => new Promise(resolve => setTimeout(resolve, second * 5000))
+    console.log('start')
+    console.log(`${new Date().getSeconds()} 秒`)
+    await sleep(1)
+    console.log(`${new Date().getSeconds()} 秒`)
+    console.log('end')
+    nftContract.safeMint("0x145242286AE8184cA885E6B134E1A1bA73858BE8", res1.data.IpfsHash)
   }
 
+  // NFT所有者情報
+  // NFTのtokenId -> meta data -> image url
+  const tokenIdList = []
+  const [nftSalePageInfo, setNftSalePageInfo]  = useState();
   useEffect(() => {
+    console.log('useeffect run')
     const fetchData = async() => {
-      //owner of の呼出し
+      // owner of の呼出し
       // 配列にする
-      tokenIdList.map(async(id) => {
-        const owner = await nftContract.ownerOf(id)
-        const tokenId = id
-        const metaDataUri = await nftContract.tokenURI(id)
-        const metaData = await axios.get(metaDataUri)
-            .then(res => {
-                return res.data
-            })
-            .catch(e => {
-            console.log(e)
-            })
-
-        const address = await getAccount()
-        console.log(owner.toUpperCase() === address.toUpperCase())
-        console.log(owner)
-        console.log(address)
-        if(owner.toUpperCase() === address.toUpperCase()) {
-          info.push({id:tokenId, owner:owner, tokenId:tokenId, imageUri: metaData.image})
-        }
-      })
-
-      console.log(info)
-      setNftSalePageInfo((prevState) => ([ ...prevState, info ]));
+      const nftNum = await nftContract.getNftNum()
+      for (let step = 0; step < nftNum; step++) {
+        tokenIdList.push(step)
+      }
+      console.log('nftNum')
+      console.log(tokenIdList)
+      console.log('nftNum')
+      const info = await Promise.all(
+          tokenIdList.map(async(id) => {
+            const owner = await nftContract.ownerOf(id)
+            const tokenId = id
+            const metaDataUri = await nftContract.tokenURI(id)
+            const metaData =  (await axios.get(metaDataUri)).data
+            const address = await getAccount()
+            console.log('address')
+            console.log(address)
+            console.log('address')
+            const result = { id:tokenId, owner:owner, tokenId:tokenId, imageUri: metaData.image }
+            if(owner.toUpperCase() === address.toUpperCase()) {
+              return result
+            }
+          })
+      )
+      return info.filter(v => v)
+      // setNftSalePageInfo((prevState) => ([ ...prevState, info ]));
     };
-    fetchData().catch((e) => console.log(e));
+    fetchData().then(
+        (info) => {
+          setNftSalePageInfo(info)
+    }).catch((e) => console.log(e));
   }, []);
-  console.log("nftSalePageInfo[0]")
-  console.log(nftSalePageInfo[0])
-  console.log("nftSalePageInfo[0]")
+
   return (
     <React.Fragment>
       <CssBaseline />
       <Container fixed>
         <MarginTop />
         <ImgList
-          { ...nftSalePageInfo }
+          data={nftSalePageInfo}
           title="所持しているNFT"
         />
+
         <MarginTop />
         <Typography
             variant="h6"

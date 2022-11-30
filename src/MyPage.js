@@ -1,9 +1,9 @@
+import React from 'react'
 import MyNFT from './component/MyNFT'
-
-const Home = () => {
+const MyPage = () => {
   return (
     <MyNFT />
   );
 };
 
-export default Home;
+export default MyPage;
