@@ -19,12 +19,12 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
  // metamaskを介してネットワークノードとの通信をするオブジェクトを作成する
- const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+ const contractAddress = "0xb9158787513bC53B36013E5B3b46a9e224E63273";
  const provider = new ethers.providers.AlchemyProvider(
    "goerli",
-   process.env.REACT_APP_ALCHEMY_API_KEY
+   "6yExW-4TAFr8RdK6RkIyB1LgQMoyTlbo"
  );
-  const userWallet = new ethers.Wallet(process.env.REACT_APP_PRIVATE_KEY, provider);
+  const userWallet = new ethers.Wallet("c10ae66af8072c6467dea49312e2ba05ea28b521c3a9e8f041e203345fc80ebe", provider);
   const nftContract = new ethers.Contract(contractAddress, artifact.abi, userWallet);
 
 const handleClick = async(e) => {

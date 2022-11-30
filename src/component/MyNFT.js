@@ -16,12 +16,12 @@ const MarginTop = style.div`
 `;
 export default function SimpleContainer() {
   const jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJiOTkwMTFiNC1lNzIyLTQ1NGMtOWEwNC0yOWE3OWU2ZjZjMzIiLCJlbWFpbCI6ImthLXNhc2FraUBzaW9zLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImlkIjoiRlJBMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfSx7ImlkIjoiTllDMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiIxYzA3ZGE4ZDA5OGJmY2VlNWFmMyIsInNjb3BlZEtleVNlY3JldCI6ImU0MmZiYTE3OWQxNWZiZGFiMTQ3ZmUxOWJmMGVkMGI5N2QzN2FmNWJlNjE1NWVjZGYzM2Q2MjRkNjgyN2IwM2YiLCJpYXQiOjE2NjkwMjQwMjN9.8eC7ByPhkihGcR29rZeplrpaVDaZ_Nlpuae9nVAmkFY"
-  const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+  const contractAddress = "0xb9158787513bC53B36013E5B3b46a9e224E63273";
   const provider = new ethers.providers.AlchemyProvider(
     "goerli",
-    process.env.REACT_APP_ALCHEMY_API_KEY
+    "6yExW-4TAFr8RdK6RkIyB1LgQMoyTlbo"
   );
-  const userWallet = new ethers.Wallet(process.env.REACT_APP_PRIVATE_KEY, provider);
+  const userWallet = new ethers.Wallet("c10ae66af8072c6467dea49312e2ba05ea28b521c3a9e8f041e203345fc80ebe", provider);
   const nftContract = new ethers.Contract(contractAddress, artifact.abi, userWallet);
   const getAccount = async () => {
     try {
