@@ -10,6 +10,9 @@ import style from "styled-components";
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Loading from './Loading';
+import Snackbar from '@mui/material/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 const FormData = require("form-data");
 const MarginTop = style.div`
@@ -47,14 +50,6 @@ export default function SimpleContainer() {
 
   const [file, setFile] = useState(null)
   const [ isLoading, setIsLoading ] = useState(false);
-  const [open, setOpen] = React.useState(false);
-  const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setOpen(false);
-  };
   const onChangeFile = (e) => {
     const files = e.target.files
     if (files && files[0]) {
@@ -118,10 +113,13 @@ export default function SimpleContainer() {
       console.log('end')
       nftContract.safeMint("0x145242286AE8184cA885E6B134E1A1bA73858BE8", res1.data.IpfsHash)
       setIsLoading(false);
+      setMessage("Mintに成功しました。")
       setOpen(true);
     } catch(e) {
       setIsLoading(false);
+      setMessage("Mintに失敗しました。")
       setOpen(true);
+
     }
   }
 
@@ -166,10 +164,41 @@ export default function SimpleContainer() {
     }).catch((e) => console.log(e));
   }, []);
 
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = React.useState("");
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
+
+  const action = (
+    <React.Fragment>
+      <Button color="secondary" size="small" onClick={handleClose}>
+      </Button>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleClose}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </React.Fragment>
+  );
+
   return (
     <React.Fragment>
       <CssBaseline />
       <Container fixed>
+      <Snackbar
+            open={open}
+            autoHideDuration={6000}
+            onClose={handleClose}
+            message={message}
+            action={action}
+          />
         <MarginTop />
         { isLoading ?
               <Loading /> :
@@ -178,8 +207,6 @@ export default function SimpleContainer() {
               title="所持しているNFT"
             />
         }
-
-
         <MarginTop />
         <Typography
             variant="h6"

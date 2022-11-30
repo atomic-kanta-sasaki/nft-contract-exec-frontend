@@ -11,6 +11,9 @@ import artifact from "../abi/nft.json";
 import { ethers } from "ethers";
 import AppBar from './AppBar';
 import Loading from './Loading';
+import Snackbar from '@mui/material/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -88,19 +91,55 @@ const StandardImageList = (props) => {
             value: ethers.utils.parseEther(amountInEther)
         }
         setIsLoading(false)
+        setMessage("購入完了しました。")
+        setOpen(true);
         // 送金Transactionの実行
         provider.sendTransaction(tx)
           .then((txObj) => {
               console.log(txObj)
           })
       } catch(e) {
+        setMessage("購入に失敗しました。")
+        setOpen(true);
         setIsLoading(false)
       }
     }
+
+    const [open, setOpen] = React.useState(false);
+    const [message, setMessage] = React.useState("");
+    const handleClose = (event, reason) => {
+      if (reason === 'clickaway') {
+        return;
+      }
+      setOpen(false);
+    };
+
+    const action = (
+      <React.Fragment>
+        <Button color="secondary" size="small" onClick={handleClose}>
+        </Button>
+        <IconButton
+          size="small"
+          aria-label="close"
+          color="inherit"
+          onClick={handleClose}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </React.Fragment>
+    );
     return (
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
           <AppBar title={title} />
+          <Snackbar
+            open={open}
+            autoHideDuration={6000}
+            onClose={handleClose}
+            message={message}
+            action={action}
+          />
+
           {data?.map((item) => (
             <Grid item xs={2} sm={4} md={4} key={item.id}>
               <Item>
