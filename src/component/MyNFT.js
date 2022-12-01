@@ -156,7 +156,6 @@ export default function SimpleContainer() {
           })
       )
       return info.filter(v => v)
-      // setNftSalePageInfo((prevState) => ([ ...prevState, info ]));
     };
     fetchData().then(
         (info) => {
